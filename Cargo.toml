@@ -1,0 +1,12 @@
+[workspace]
+resolver = "3"
+members = ["chip8_core", "desktop"]
+
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+
+# 在crate 中 与 {workspace = true } 一起使用
+[workspace.dependencies]
