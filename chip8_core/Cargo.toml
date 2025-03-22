@@ -4,3 +4,4 @@ version = { workspace = true}
 edition =  { workspace = true}
 
 [dependencies]
+getrandom = { version = "0.3", features = ["wasm_js"] }

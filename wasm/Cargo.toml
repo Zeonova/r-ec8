@@ -1,0 +1,27 @@
+[package]
+name = "wasm"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+chip8_core = { path = "../chip8_core" }
+js-sys = { workspace = true }
+wasm-bindgen = { workspace = true }
+web-sys = {workspace = true }
+
+console_error_panic_hook = "^0.1.7"
+
+
+cfg-if = "0.1"
+log = "^0.4" 
+console_log = { version = "1", features = ["color"] }
+
+[lib]
+# Generate a dynamically compatible C library.
+crate-type = ["cdylib", "rlib"]
+
+# RUSTFLAGS='--cfg getrandom_backend="wasm_js"' wasm-pack build --target web
+# wasm-pack does not support this kind of flag, so the above command is needed to pass it.
+# Under discussion
+# [target.wasm32-unknown-unknown]
+# rustflags = ["--cfg", "getrandom_backend=\"wasm_js\""]

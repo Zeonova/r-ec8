@@ -1,6 +1,3 @@
-#![feature(random)]
-use core::num;
-use std::{process::id, random::random};
 // Chip-8
 const FONTSET_SIZE: usize = 80;
 const FONTSET: [u8; FONTSET_SIZE] = [
@@ -54,11 +51,11 @@ pub struct Emu {
 
 impl Default for Emu {
     fn default() -> Self {
-        let mut ram = [0; RAM_SIZE]; //	Rust 允许省略 字段名: 变量名 形式，仅当二者相同 时（如 ram）。
+        let mut ram = [0; RAM_SIZE];
         ram[..FONTSET_SIZE].copy_from_slice(&FONTSET);
         Self {
             pc: START_ADDR,
-            ram,
+            ram, // Rust allows omitting field names only when they are the same
             screen: [false; SCREEN_H * SCREEN_W],
             v_reg: [0; NUM_REGISTERS],
             i_reg: 0,
@@ -100,6 +97,7 @@ impl Emu {
     }
     pub fn tick(&mut self) {
         let op = self.fetch();
+
         // Decode and Execute can happen simultaneously in the Chip-8 systems.
         self.execute(op);
     }
@@ -264,7 +262,7 @@ impl Emu {
             (0xC, _, _, _) => {
                 let x = digit2 as usize;
                 let nn = (op & 0xFF) as u8;
-                let rng: u8 = random();
+                let rng: u8 = get_random_u8().unwrap();
                 self.v_reg[x] = rng & nn;
             }
             // DRAW
@@ -279,7 +277,7 @@ impl Emu {
 
                 for y_line in 0..num_row {
                     // Determine which memory address out row's data is stored
-                    let addr = self.i_reg + y_line as u16;
+                    let addr = self.i_reg + y_line;
                     // This is the data for each Y'line.
                     let pixels = self.ram[addr as usize];
 
@@ -407,7 +405,7 @@ impl Emu {
         }
         if self.st > 0 {
             if self.st == 1 {
-                //TODO
+                // TODO:  Wait do this function
                 // BEEP
                 // Because this book does not implement this function, so it will finish later.
             }
@@ -422,4 +420,22 @@ impl Emu {
         self.pc += 2;
         op
     }
+
+    // Display-related function
+    pub fn get_display(&self) -> &[bool] {
+        &self.screen
+    }
+    pub fn keypress(&mut self, idx: usize, pressed: bool) {
+        self.keys[idx] = pressed;
+    }
+    pub fn load(&mut self, data: &[u8]) {
+        let start = START_ADDR as usize;
+        let end = (START_ADDR as usize) + data.len();
+        self.ram[start..end].copy_from_slice(data);
+    }
+}
+fn get_random_u8() -> Result<u8, getrandom::Error> {
+    let mut buf = [0u8; 1];
+    getrandom::fill(&mut buf)?;
+    Ok(u8::from_ne_bytes(buf))
 }
